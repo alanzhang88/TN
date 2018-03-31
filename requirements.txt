@@ -1,0 +1,10 @@
+pika
+requests
+newspaper3k
+redis
+nltk
+scikit-learn
+pymongo
+dateutil
+tensorflow
+json-rpc

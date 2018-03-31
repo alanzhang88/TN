@@ -1,0 +1,2 @@
+model_checkpoint_path: "cnn_news_classifier"
+all_model_checkpoint_paths: "cnn_news_classifier"
