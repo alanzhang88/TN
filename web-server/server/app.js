@@ -29,10 +29,10 @@ app.use('/auth/google',googleAuth);
 app.use('/api',api);
 
 
-// app.use(express.static(publicPath));
-//
-// app.get('*',(req,res)=>{
-//   res.sendFile(`${publicPath}/index.html`);
-// });
+app.use(express.static(publicPath));
+
+app.get('*',(req,res)=>{
+  res.sendFile(`${publicPath}/index.html`);
+});
 
 module.exports = app;
