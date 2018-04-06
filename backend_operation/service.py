@@ -11,6 +11,7 @@ REDIS_PORT = 6379
 from operator import itemgetter
 import pickle
 from bson.code import Code
+from bson.objectid import ObjectId
 
 redis_client = redis.StrictRedis(REDIS_HOST, REDIS_PORT)
 
@@ -45,20 +46,29 @@ def clickLog(**kwargs):
 
 @dispatcher.add_method
 def getNews(**kwargs):
-    if 'user_id' not in kwargs.keys():
-        return None
     page_num = 1
     if 'page_num' in kwargs.keys():
         page_num = kwargs['page_num']
+    start = (page_num - 1) * NEWS_PER_PAGE
+    end = page_num * NEWS_PER_PAGE
+
+    if 'user_id' not in kwargs.keys():
+        news_list = list(NEWS_COLLECTION.find({},limit=MAX_NEWS,sort=[('publishedAt',-1)]))
+        news_list = news_list[start:end]
+        for news in news_list:
+            del news['_id']
+            del news['text']
+            news['publishedAt'] = news['publishedAt'].isoformat()
+        return news_list
 
     digest_list = []
     if redis_client.get(kwargs['user_id']) is None:
-        user = USER_COLLECTION.find_one({'user_id': kwargs['user_id']})
+        user = USER_COLLECTION.find_one({'_id': ObjectId(kwargs['user_id'])})
         if user is None:
             return None
-        news_list = list(NEWS_COLLECTION.find({},limit=MAX_NEWS,sort=[('publishedAt',-1)]))        
+        news_list = list(NEWS_COLLECTION.find({},limit=MAX_NEWS,sort=[('publishedAt',-1)]))
         # print(news_list[0]['publishedAt'].timestamp())
-        if 'preference' in user.keys():
+        if 'preference' in user.keys() and len(user['preference'])>0:
             time_diff = news_list[0]['publishedAt'].timestamp() - news_list[-1]['publishedAt'].timestamp()
             smooth_portion = SMOOTH_FACTOR * time_diff
             min_time = news_list[-1]['publishedAt'].timestamp()
@@ -70,13 +80,11 @@ def getNews(**kwargs):
         else:
             for news in news_list:
                 digest_list.append(news['digest'])
-        redis_client.set(user['user_id'],pickle.dumps(digest_list),ex=TIMEOUT_USER_IN_SECONDS)
+        redis_client.set(kwargs['user_id'],pickle.dumps(digest_list),ex=TIMEOUT_USER_IN_SECONDS)
     else:
         digest_list = pickle.loads(redis_client.get(kwargs['user_id']))
 
 
-    start = (page_num - 1) * NEWS_PER_PAGE
-    end = page_num * NEWS_PER_PAGE
     slice_index = digest_list[start:end]
     # print(slice_index)
     # news_slice_list = list(NEWS_COLLECTION.find({

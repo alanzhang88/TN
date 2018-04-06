@@ -2,3 +2,4 @@ playground/
 **/node_modules/
 *.pyc
 .DS_Store
+**/build/

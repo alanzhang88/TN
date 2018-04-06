@@ -12,6 +12,8 @@ queueName = config.CLICK_QUEUE_NAME
 AMQPClient = CloudAMQPClient(connectionURL=AMQP_URL_CLICK,queueName=queueName)
 USER_COLLECTION_NAME = config.USER_COLLECTION_NAME
 
+from bson.objectid import ObjectId
+
 collection = MongodbClient.get_collection(USER_COLLECTION_NAME)
 NUM_OF_CLASSES = 17
 INITIAL_P = 1.0 / NUM_OF_CLASSES
@@ -24,10 +26,10 @@ def handle_msg(channel,method,properties,body):
         print(msg['user_id'])
         print(msg['news_label'])
         res = collection.find_one({
-            'user_id': msg['user_id']
+            '_id': ObjectId(msg['user_id'])
         })
         print(res)
-        if 'preference' not in res.keys():
+        if 'preference' not in res.keys() or len(res['preference'])==0:
             res['preference'] = [ INITIAL_P for i in range(NUM_OF_CLASSES)]
 
         #Modify prob
@@ -37,7 +39,7 @@ def handle_msg(channel,method,properties,body):
                 res['preference'][i] = (1-ALPHA)*res['preference'][i] + ALPHA
             else:
                 res['preference'][i] = (1-ALPHA)*res['preference'][i]
-        collection.replace_one({'user_id':msg['user_id']},res)
+        collection.replace_one({'_id':ObjectId(msg['user_id'])},res)
 
     else:
         print("No Message received")
