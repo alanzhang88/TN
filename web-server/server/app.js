@@ -21,7 +21,7 @@ app.use(cookieSession({
   name: 'session',
   keys: [cookieKey],
   maxAge: 7 * 24 * 60 * 60 * 1000
-}))
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 

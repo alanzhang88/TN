@@ -3,5 +3,6 @@ module.exports = {
   'googleClientSecret':'tn38fkKEYepAeoHcu8cLZ9tz',
   'mongoURI': 'mongodb://localhost:27017/TN',
   'cookieKey': 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c',
-  'newsServerURI': 'http://localhost:8080/'
+  'newsServerURI': 'http://localhost:8080/',
+  'saltRounds': 10
 };

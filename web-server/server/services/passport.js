@@ -2,6 +2,9 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { googleClientID, googleClientSecret } = require('../config/config');
 const { User } = require('../models/user');
+const { Account } = require('../models/account');
+const bcrypt = require('bcrypt');
+const LocalStrategy = require('passport-local').Strategy;
 
 passport.serializeUser((user,done)=>{
   done(null,user.id);
@@ -51,5 +54,36 @@ passport.use(
     );
   })
 );
+
+passport.use(new LocalStrategy(
+  (username,password,done) => {
+    Account.findOne({
+      email: username
+    }).then((user)=>{
+      if(!user){
+        return done(null,false,{error: 'Incorrect username.'});
+      }
+      bcrypt.compare(password,user.password).then(
+        (res) => {
+          if(res){
+            User.findOne({
+              email: username
+            }).then(
+              (retuser) => {
+                return done(null,retuser);
+              }
+            );
+          }
+          else{
+            return done(null,false,{error: 'Incorrect password.'});
+          }
+        }
+      )
+    }).catch((err)=>{
+      console.log(err);
+      done(err);
+    });
+  }
+));
 
 module.exports = {passport};

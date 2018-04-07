@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {connect} from 'react-redux';
 import {fetchUser, logout} from '../actions';
 import { withRouter } from 'react-router';
@@ -7,8 +7,16 @@ import { withRouter } from 'react-router';
 class Header extends Component {
 
   componentDidMount(){
+    // this.unlisten = this.props.history.listen((location,action)=>{
+    //   // console.log("on route change");
+    //   this.props.fetchUser();
+    // });
     this.props.fetchUser();
   }
+
+  // componentWillUnmount(){
+  //   this.unlisten();
+  // }
 
   serverLogout(){
     this.props.logout(()=>this.props.history.push("/"));
@@ -22,7 +30,7 @@ class Header extends Component {
             <span className="nav-link active">{this.props.user.email}</span>
           </li>
           <li className="nav-item">
-            <a onClick={this.serverLogout.bind(this)} style={{"cursor": "pointer"}} className="nav-link active">Logout</a>
+            <a onClick={this.serverLogout.bind(this)} style={{"cursor": "pointer"}} className="nav-link">Logout</a>
           </li>
         </ul>
       );
@@ -32,7 +40,13 @@ class Header extends Component {
       return (
         <ul className="nav navbar-nav justify-content-end">
           <li className="nav-item">
-            <a className="nav-link active" href="/auth/google">Sign in with Google</a>
+            <Link className="nav-link" to="/signup">Sign Up</Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/login">Log In</Link>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/auth/google">Sign in with Google</a>
           </li>
         </ul>
       );
@@ -44,7 +58,7 @@ class Header extends Component {
       <div>
         <nav className="navbar navbar-expand-md navbar-dark bg-dark">
           <div className="container-fluid">
-            <span className="navbar-brand">TapNews</span>
+            <Link className="navbar-brand" to="/">TapNews</Link>
               {this.renderUser()}
           </div>
         </nav>
